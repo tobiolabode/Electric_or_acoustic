@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>My App</title>
+    <style>
+      * {
+        font-size: 30px
+      }
+    </style>
+  </head>
+  <body>
+    <input id="image-selector" type="file">
+    <button id="predict button">predict</button>
+    <p style="font-weight:bold">predictions</p>
+    <p>acoustic_guitar <span id="acoustic-prediction"></p>
+    <p>electric_guitar <span id="electric-prediction"></p>
+    <img id="selected-image" src=""/>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        let base64image;
+        $("#image-selector").change(function() {
+          let reader = new FileReader();
+          reader.onload = function(e) {
+              let dataURL = reader.result;
+              $("#selected-image").attr("src", dataURL);
+              base64image = dataURL.replace("data:image/png;base64,", "");
+              console.log(base64image);
+          }
+          reader.readAsDataURL($("#image-selector")[0].files[0]);
+          $("#acoustic-prediction").text("");
+          $("#electric-prediction").text("");
+        });
+
+        $("#predict-button").click(function(event) {
+          let message = {
+              image: base64image
+          }
+          console.log(message);
+          $.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function(response){
+            $("#acoustic-prediction").text(response.prediction.acoustic.toFixed(6));
+            $("#electric-prediction").text(response.prediction.electric.toFixed(6));
+            console.log(response);
+          });
+        });
+    </script>
+  </body>
+</html>
